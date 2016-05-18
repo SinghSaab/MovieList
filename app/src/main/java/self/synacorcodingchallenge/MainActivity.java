@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
     // Log tag
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String api_key = "242bb6fd5a1f11b52d9b2de77cbe119f";
-    private static String sort_by = "vote_count.desc";
 
     // Movies json url
     private ProgressDialog pDialog;
@@ -65,41 +65,41 @@ public class MainActivity extends AppCompatActivity {
         pDialog.show();
 
 
-        // Creating volley request obj
-        movieReq = new JsonObjectRequest(Request.Method.GET, craftURL(1), null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        hideProgressDialog();
-                        int objectCount;
-                        // Parsing json
-                        try {
-                            JSONArray arr = response.getJSONArray("results");
-                            for (objectCount = 0; objectCount < arr.length(); objectCount++) {
-                                JSONObject obj = arr.getJSONObject(objectCount);
-                                MovieParam movie = new MovieParam();
-                                movie.setTitle(obj.getString("title"));
-                                movie.setYear(obj.getString("release_date"));
-                                // adding object values to movies array
-                                movieList.add(movie);
+        // Creating volley request obj for JSONObject
+        for (int pageNo = 1; pageNo <= 5; pageNo++) {
+            movieReq = new JsonObjectRequest(Request.Method.GET, craftURL(pageNo), null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            hideProgressDialog();
+                            // Parsing json
+                            try {
+                                JSONArray arr = response.getJSONArray("results");
+                                for (int objectCount = 0; objectCount < arr.length(); objectCount++) {
+                                    JSONObject obj = arr.getJSONObject(objectCount);
+                                    MovieParam movie = new MovieParam();
+                                    movie.setTitle(obj.getString("title"));
+                                    movie.setYear(obj.getString("release_date"));
+                                    // adding object values to movies array
+                                    movieList.add(movie);
+                                }
+                                // notifying list adapter about data changes
+                                // so that it renders the list view with updated data
+                                adapter.notifyDataSetChanged();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                            // notifying list adapter about data changes
-                            // so that it renders the list view with updated data
-                            adapter.notifyDataSetChanged();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.d(TAG, "Error: " + error.getMessage());
-                hideProgressDialog();
-            }
-        });
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+                    hideProgressDialog();
+                }
+            });
 // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(movieReq);
-
+            AppController.getInstance().addToRequestQueue(movieReq);
+        }
     }
 
 
@@ -119,13 +119,13 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_sortTitle) {
-            Collections.sort(movieList, new NewComparator(id) );
+            Collections.sort(movieList, new NewComparator(id));
             adapter.notifyDataSetChanged();
             return true;
         }
 
         if (id == R.id.action_sortYear) {
-            Collections.sort(movieList,new NewComparator(id));
+            Collections.sort(movieList, new NewComparator(id));
             adapter.notifyDataSetChanged();
             return true;
         }

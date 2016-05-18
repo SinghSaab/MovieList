@@ -52,9 +52,9 @@ public class LVadapter extends BaseAdapter {
         // getting movie data for the row
         MovieParam m = movieItems.get(position);
         // title
-        title.setText(m.getTitle());
+        title.setText(position + ". " + m.getTitle());
         // release year
-        year.setText(m.getYear());
+        year.setText(" " + m.getYear());
 
         return convertView;
     }

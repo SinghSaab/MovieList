@@ -5,7 +5,7 @@ package self.synacorcodingchallenge;
  */
 public class MovieParam {
 
-    private String title,year;
+    private String title, year;
 
     public MovieParam() {
     }
