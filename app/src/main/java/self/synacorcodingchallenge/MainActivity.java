@@ -6,7 +6,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,22 +22,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     // Log tag
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String api_key = "242bb6fd5a1f11b52d9b2de77cbe119f";
+    private static String sort_by = "vote_count.desc";
 
     // Movies json url
-    private static final String url = "http://api.themoviedb.org/3/discover/movie?" +
-            "page=1&vote_gte=250&sort_by=vote_count.desc&api_key=" + api_key;
-
-    //   private static final String url = "http://api.androidhive.info/json/movies.json";
     private ProgressDialog pDialog;
     private List<MovieParam> movieList = new ArrayList<MovieParam>();
     private ListView listView;
     private LVadapter adapter;
+
+    JsonObjectRequest movieReq;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,33 +64,31 @@ public class MainActivity extends AppCompatActivity {
         pDialog.setMessage("Loading...");
         pDialog.show();
 
+
         // Creating volley request obj
-        JsonObjectRequest movieReq = new JsonObjectRequest(Request.Method.GET, url, null,
+        movieReq = new JsonObjectRequest(Request.Method.GET, craftURL(1), null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG, response.toString());
                         hideProgressDialog();
-                        Log.d(TAG, "Response length: " + response.length());
+                        int objectCount;
                         // Parsing json
                         try {
                             JSONArray arr = response.getJSONArray("results");
-                            for(int i=0;i<arr.length();i++) {
+                            for (objectCount = 0; objectCount < arr.length(); objectCount++) {
+                                JSONObject obj = arr.getJSONObject(objectCount);
                                 MovieParam movie = new MovieParam();
-                                JSONObject obj = arr.getJSONObject(i);
                                 movie.setTitle(obj.getString("title"));
                                 movie.setYear(obj.getString("release_date"));
-
-                                // adding movie to movies array
+                                // adding object values to movies array
                                 movieList.add(movie);
                             }
+                            // notifying list adapter about data changes
+                            // so that it renders the list view with updated data
+                            adapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
-                        // notifying list adapter about data changes
-                        // so that it renders the list view with updated data
-                        adapter.notifyDataSetChanged();
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -102,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         });
 // Adding request to request queue
         AppController.getInstance().addToRequestQueue(movieReq);
+
     }
 
 
@@ -120,7 +118,15 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_sortTitle) {
+            Collections.sort(movieList, new NewComparator(id) );
+            adapter.notifyDataSetChanged();
+            return true;
+        }
+
+        if (id == R.id.action_sortYear) {
+            Collections.sort(movieList,new NewComparator(id));
+            adapter.notifyDataSetChanged();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -138,5 +144,12 @@ public class MainActivity extends AppCompatActivity {
             pDialog.dismiss();
             pDialog = null;
         }
+    }
+
+    private String craftURL(int pageNo) {
+        final String urlDefault = "http://api.themoviedb.org/3/discover/movie?" +
+                "page=" + String.valueOf(pageNo) + "&vote_count.gte=250&sort_by=vote_count.desc" +
+                "&api_key=" + api_key;
+        return urlDefault;
     }
 }

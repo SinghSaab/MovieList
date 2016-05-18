@@ -25,7 +25,8 @@ public class LVadapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return movieItems.size();    }
+        return movieItems.size();
+    }
 
     @Override
     public Object getItem(int location) {
@@ -53,7 +54,7 @@ public class LVadapter extends BaseAdapter {
         // title
         title.setText(m.getTitle());
         // release year
-        year.setText(String.valueOf(m.getYear()));
+        year.setText(m.getYear());
 
         return convertView;
     }
