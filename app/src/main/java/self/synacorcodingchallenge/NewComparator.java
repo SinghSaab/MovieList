@@ -6,23 +6,24 @@ import java.util.Comparator;
  * Created by Administrator on 2016-05-17.
  */
 public class NewComparator implements Comparator<MovieParam> {
-    private String choice;
+    private String sortChoice;
 
+//    Depending upon the menu id; sorting method to be changed
     NewComparator(int id) {
         if (id == R.id.action_sortTitle) {
-            choice = "Title";
+            sortChoice = "Title";
         } else {
-            choice = "Year";
+            sortChoice = "Year";
         }
-
     }
-
 
     @Override
     public int compare(MovieParam lhs, MovieParam rhs) {
-        if(choice == "Title")
+        if(sortChoice.equals("Title"))
+//            Ascending Title sort
             return lhs.getTitle().compareTo(rhs.getTitle());
         else
+//        Descending Date sort
             return rhs.getYear().compareTo(lhs.getYear());
     }
 

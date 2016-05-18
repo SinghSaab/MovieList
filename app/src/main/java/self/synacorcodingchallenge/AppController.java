@@ -33,6 +33,7 @@ public class AppController extends Application {
         return mRequestQueue;
     }
 
+//    Passing a TAG with the request would help to cancel the respective request
     public <T> void addToRequestQueue(Request<T> req, String tag) {
         // set the default tag if tag is empty
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);

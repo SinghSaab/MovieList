@@ -54,7 +54,7 @@ public class LVadapter extends BaseAdapter {
         // title
         title.setText(position + ". " + m.getTitle());
         // release year
-        year.setText(" " + m.getYear());
+        year.setText("    " + m.getYear());
 
         return convertView;
     }
